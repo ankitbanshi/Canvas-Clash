@@ -10,24 +10,39 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production'
-      ? false
-      : (origin, cb) => cb(null, true), // allow any localhost port in dev
+    origin: (origin, callback) => {
+      const allowedOrigins = (process.env.CLIENT_URLS || '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      if (!origin || process.env.NODE_ENV !== 'production' || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin not allowed: ${origin}`));
+    },
     methods: ['GET', 'POST']
   }
 });
 
-// Serve React build in production
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+// Optional single-service deployment: set CLIENT_BUILD_DIR to a React build folder.
+const clientBuildDir = process.env.CLIENT_BUILD_DIR
+  ? path.resolve(process.cwd(), process.env.CLIENT_BUILD_DIR)
+  : null;
+
+if (clientBuildDir) {
+  app.use(express.static(clientBuildDir));
+}
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-// SPA fallback (Express 5 wildcard syntax)
-app.get('/{*splat}', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-});
+if (clientBuildDir) {
+  app.get('/{*splat}', (req, res) => {
+    res.sendFile(path.join(clientBuildDir, 'index.html'));
+  });
+}
 
 // Socket.IO connection handler
 io.on('connection', (socket) => {

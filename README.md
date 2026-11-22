@@ -117,15 +117,17 @@ The server is **authoritative**: clients send actions, while the server validate
 
 ```text
 canvas-clash/
-├── server.js
-├── socketHandlers.js
-├── roomManager.js
-├── gameLoop.js
-├── rateDrawing.js
-├── prompts.js
-├── avatars.js
 ├── package.json
-│
+├── backend/
+│   ├── server.js
+│   ├── socketHandlers.js
+│   ├── roomManager.js
+│   ├── gameLoop.js
+│   ├── rateDrawing.js
+│   ├── prompts.js
+│   ├── avatars.js
+│   ├── package.json
+│   └── .env.example
 └── client/
     ├── public/
     │   ├── avatar/
@@ -143,7 +145,8 @@ canvas-clash/
             ├── Voting.js
             ├── Results.js
             ├── GameSummary.js
-            └── Chat.js
+            ├── Chat.js
+            └── socket.js
 ```
 
 ---
@@ -163,25 +166,21 @@ cd canvas-clash
 npm install
 ```
 
-The root `postinstall` script installs the client dependencies automatically.
-
 ### Run Locally
 
 ```bash
 npm run dev
 ```
-
-Or run frontend and backend separately:
+Or run the frontend and backend separately:
 
 ```bash
-# Backend
-npm start
+# Backend (http://localhost:3001)
+npm run dev:backend
 ```
 
 ```bash
-# Frontend
-cd client
-npm start
+# Frontend (http://localhost:3000)
+npm run dev:client
 ```
 
 ### Local URLs
@@ -190,6 +189,44 @@ npm start
 Frontend → http://localhost:3000
 Backend  → http://localhost:3001
 Health   → http://localhost:3001/health
+```
+
+## Deployment
+
+### Deploy Frontend and Backend Separately
+
+1. Deploy `client/build` to any static host.
+2. Set `REACT_APP_SERVER_URL` in `client/.env` or in the host build environment:
+
+```env
+REACT_APP_SERVER_URL=https://your-backend.example.com
+```
+
+3. Build and deploy the client:
+
+```bash
+npm install
+npm run build:client
+```
+
+4. Deploy the `backend/` workspace to a Node.js host. Set:
+
+```env
+PORT=3001
+NODE_ENV=production
+CLIENT_URLS=https://your-client.example.com
+```
+
+`CLIENT_URLS` accepts a comma-separated list of allowed frontend origins.
+
+### Deploy as One Node.js Service
+
+Build the React app and start the backend with the build directory:
+
+```bash
+npm install
+npm run build:client
+CLIENT_BUILD_DIR=client/build npm start
 ```
 
 ---

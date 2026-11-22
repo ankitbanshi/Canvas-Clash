@@ -1,29 +1,23 @@
 {
-  "name": "canvas-clash-server",
+  "name": "canvas-clash",
   "version": "1.0.0",
-  "description": "Multiplayer drawing game backend",
-  "main": "server.js",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "client"
+  ],
   "scripts": {
-    "start": "node server.js",
-    "dev": "concurrently \"nodemon server.js\" \"npm run dev:client\" --names \"server,client\" --prefix-colors \"cyan,magenta\"",
-    "dev:client": "cd client && npm start",
-    "postinstall": "cd client && npm install",
-    "build": "cd client && npm run build",
-    "build-client": "cd client && npm run build",
-    "setup": "npm install"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "@hackernoon/pixel-icon-library": "^1.1.0",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "socket.io": "^4.8.3"
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run start --workspace=client\" --names \"backend,client\" --prefix-colors \"cyan,magenta\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:client": "npm run start --workspace=client",
+    "start": "npm run start --workspace=backend",
+    "build": "npm run build --workspace=client",
+    "build:client": "npm run build --workspace=client",
+    "build:backend": "npm run build --workspace=backend"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "@hackernoon/pixel-icon-library": "^1.1.0"
   }
 }
